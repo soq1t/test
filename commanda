@@ -5,3 +5,45 @@ sudo apt-get update && sudo apt-get install -y apt-transport-https
 sudo apt-get update && sudo apt-get install -y dotnet-sdk-7.0
 
 dotnet MVC_Flights.dll --urls "http://0.0.0.0:5005"
+
+3. Настройка службы systemd для автоматического запуска приложения
+Создайте unit-файл для systemd:
+
+Создайте новый файл:
+bash
+Копировать код
+sudo nano /etc/systemd/system/kestrel-yourapp.service
+Вставьте в него следующий код:
+ini
+Копировать код
+[Unit]
+Description=ASP.NET Core MVC Application
+
+[Service]
+WorkingDirectory=/var/www/yourapp
+ExecStart=/usr/bin/dotnet /var/www/yourapp/yourapp.dll --urls "http://0.0.0.0:5005"
+Restart=always
+# User=www-data
+# Group=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+[Install]
+WantedBy=multi-user.target
+Замените пути и название файла приложения на свои.
+Настройка прав доступа:
+
+Если вы хотите, чтобы приложение работало от имени конкретного пользователя (например, www-data), раскомментируйте соответствующие строки User и Group в конфигурации выше.
+Перезагрузите systemd и включите службу:
+
+bash
+Копировать код
+sudo systemctl daemon-reload
+sudo systemctl enable kestrel-yourapp.service
+sudo systemctl start kestrel-yourapp.service
+Проверка статуса службы:
+
+Для проверки статуса службы выполните:
+bash
+Копировать код
+sudo systemctl status kestrel-yourapp.service
